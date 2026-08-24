@@ -11,7 +11,6 @@ const DAYS_FILE = path.join(__dirname, '..', 'data', 'stream-days.json');
 const MAX_GAMES = 5;
 const MAX_INACTIVE_STREAM_DAYS = 7;
 
-// Catégories Twitch à ignorer (pas de vrais jeux)
 const EXCLUDED_CATEGORIES = [
   'Just Chatting',
   'Music',
@@ -61,11 +60,11 @@ async function getCurrentStream(token) {
   });
   if (!res.ok) throw new Error(`Erreur API Twitch: ${res.status}`);
   const data = await res.json();
-  return data.data[0] || null; // null si pas en live
+  return data.data[0] || null;
 }
 
 function todayISO() {
-  return new Date().toISOString().slice(0, 10); // YYYY-MM-DD (UTC)
+  return new Date().toISOString().slice(0, 10);
 }
 
 async function main() {
@@ -99,9 +98,23 @@ async function main() {
     return streamDays.filter((d) => d > dateStr).length;
   }
 
+  // --- DEBUG : état des jeux AVANT filtrage ---
+  console.log('--- Jours de stream connus ---');
+  console.log(streamDays.join(', '));
+  console.log('--- Jeux en mémoire (avant filtrage) ---');
+  games.forEach((g) => {
+    const count = streamDaysSince(g.lastPlayed);
+    console.log(`  "${g.name}" | dernière fois : ${g.lastPlayed} | jours de stream écoulés depuis : ${count}/${MAX_INACTIVE_STREAM_DAYS}`);
+  });
+  // --- FIN DEBUG ---
+
   const before = games.length;
   games = games.filter((g) => streamDaysSince(g.lastPlayed) < MAX_INACTIVE_STREAM_DAYS);
   const removed = before - games.length;
+
+  if (removed > 0) {
+    console.log(`${removed} jeu(x) retiré(s) pour inactivité.`);
+  }
 
   const existingIndex = games.findIndex((g) => g.name === gameName);
   let changed = changedDays || removed > 0;
@@ -120,6 +133,9 @@ async function main() {
     games = games.slice(0, MAX_GAMES);
     changed = true;
   }
+
+  console.log('--- Jeux après traitement ---');
+  games.forEach((g) => console.log(`  "${g.name}" | dernière fois : ${g.lastPlayed}`));
 
   if (changed) {
     writeJson(GAMES_FILE, games);
