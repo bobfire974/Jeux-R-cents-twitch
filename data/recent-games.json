@@ -1,5 +1,9 @@
 [
   {
+    "name": "MARVEL SNAP",
+    "lastPlayed": "2026-08-26"
+  },
+  {
     "name": "Age of Empires IV",
     "lastPlayed": "2026-08-24"
   },
@@ -10,9 +14,5 @@
   {
     "name": "League of Legends",
     "lastPlayed": "2026-08-19"
-  },
-  {
-    "name": "Sea of Thieves",
-    "lastPlayed": "2026-08-09"
   }
 ]
